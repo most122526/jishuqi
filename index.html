@@ -1,331 +1,307 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover, maximum-scale=1.0">
-  <title>自动计数器 · 智能计数终端</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-  <style>
-    :root {
-      --bg: #f0f4f8;
-      --card: #ffffff;
-      --accent: #2563eb;
-      --accent2: #10b981;
-      --danger: #ef4444;
-      --warn: #f59e0b;
-      --text: #1e293b;
-      --text2: #64748b;
-      --border: #e2e8f0;
-      --shadow: 0 4px 20px rgba(0,0,0,0.05);
-      --blue-light: #eff6ff;
-    }
-    * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color: transparent; user-select:none; }
-    body {
-      font-family: 'Inter', sans-serif;
-      background: linear-gradient(135deg, #f8fafc 0%, #e0e7ff 100%);
-      min-height: 100vh;
-      display: flex; align-items: center; justify-content: center; padding: 14px;
-    }
-    .phone {
-      max-width: 420px; width: 100%; background: var(--bg); border-radius: 44px;
-      padding: 18px 16px 24px; box-shadow: 0 20px 50px rgba(0,0,0,0.1), 0 0 0 1px rgba(0,0,0,0.04);
-      border: 1px solid #dbeafe; color: var(--text); display: flex; flex-direction: column; gap: 14px;
-    }
-    .status-bar {
-      display: flex; justify-content: space-between; align-items: center;
-      background: #ffffff; border-radius: 28px; padding: 8px 16px; font-size:0.8rem; font-weight:600;
-      border:1px solid #e2e8f0; box-shadow: 0 2px 8px rgba(0,0,0,0.02);
-    }
-    .bt-area { display:flex; align-items:center; gap:8px; }
-    .led { width:10px; height:10px; border-radius:50%; background:#cbd5e1; transition:0.3s; }
-    .led.active { background:#10b981; box-shadow:0 0 10px #10b981; animation:pulse 1.5s infinite; }
-    @keyframes pulse { 0%,100%{opacity:0.6;transform:scale(1);} 50%{opacity:1;transform:scale(1.15);} }
-    .clock { font-family:monospace; font-weight:700; font-size:0.85rem; color:#475569; }
-    .btn {
-      background:#f1f5f9; border:none; padding:7px 14px; border-radius:20px; font-weight:600; font-size:0.68rem;
-      color:#334155; cursor:pointer; display:inline-flex; align-items:center; gap:5px; border:1px solid #cbd5e1;
-      transition:0.15s; white-space:nowrap;
-    }
-    .btn:active { transform:scale(0.95); background:#e2e8f0; }
-    .btn-accent { background:#2563eb; border-color:#2563eb; color:#fff; }
-    .btn-danger { background:#ef4444; border-color:#ef4444; color:#fff; }
-    .btn-success { background:#10b981; border-color:#10b981; color:#fff; }
-    .btn-warn { background:#f59e0b; border-color:#f59e0b; color:#fff; }
-    .config-panel {
-      display:none; background:#fff; border-radius:20px; padding:12px; flex-direction:column; gap:8px;
-      border:1px solid #e2e8f0; box-shadow: var(--shadow);
-    }
-    .config-panel input {
-      background:#f8fafc; border:1px solid #cbd5e1; color:#1e293b; padding:6px 10px; border-radius:14px;
-      font-family:monospace; font-size:0.62rem; flex:1; outline:none;
-    }
-    .row { display:flex; gap:6px; flex-wrap:wrap; align-items:center; }
-    .section-label {
-      font-weight:700; font-size:0.75rem; color:#1e40af; letter-spacing:0.3px; display:flex; align-items:center; gap:6px;
-    }
-    /* 计数器大数字 */
-    .counter-box {
-      background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
-      border-radius: 28px; padding: 20px; text-align:center;
-      border:1px solid #e2e8f0; box-shadow: 0 8px 30px rgba(37,99,235,0.08);
-      position: relative; overflow: hidden;
-    }
-    .counter-value {
-      font-size: 5.5rem; font-weight: 900; font-family: 'Inter', sans-serif;
-      color: #1e40af; line-height: 1; letter-spacing: 2px;
-      transition: transform 0.2s, color 0.2s;
-    }
-    .counter-value.pulse-anim {
-      transform: scale(1.15); color: #2563eb;
-    }
-    .counter-label { font-size:0.8rem; color:#64748b; margin-top:4px; }
-    /* 放入状态 */
-    .sensor-indicator {
-      display: flex; align-items:center; justify-content:center; gap:12px; margin-top:12px;
-      background:#f1f5f9; border-radius:20px; padding:10px 16px;
-    }
-    .sensor-dot {
-      width:14px; height:14px; border-radius:50%; background:#cbd5e1; transition:0.3s;
-    }
-    .sensor-dot.active { background:#10b981; box-shadow:0 0 14px #10b981; }
-    .sensor-text { font-weight:600; font-size:0.8rem; color:#475569; }
-    /* 控制按钮网格 */
-    .control-grid {
-      display:grid; grid-template-columns: repeat(2,1fr); gap:10px;
-    }
-    .control-btn {
-      background:#fff; border:1px solid #e2e8f0; border-radius:22px; padding:14px 8px;
-      text-align:center; font-weight:700; font-size:0.8rem; color:#334155; cursor:pointer;
-      transition:0.15s; display:flex; flex-direction:column; align-items:center; gap:4px;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.02);
-    }
-    .control-btn:active { transform:scale(0.96); background:#f8fafc; }
-    .control-btn .icon { font-size:1.5rem; }
-    .control-btn.start { color:#2563eb; border-color:#bfdbfe; }
-    .control-btn.stop { color:#ef4444; border-color:#fecaca; }
-    .control-btn.clear { color:#f59e0b; border-color:#fde68a; }
-    .control-btn.reset { color:#8b5cf6; border-color:#ddd6fe; }
-    .log-box {
-      background:#fff; border-radius:18px; padding:8px 12px; height:70px; overflow-y:auto;
-      font-family:monospace; font-size:0.58rem; color:#475569; border:1px solid #e2e8f0;
-    }
-    .log-entry { border-bottom:1px solid #f1f5f9; padding:2px 0; }
-    .log-entry.tx { color:#2563eb; } .log-entry.rx { color:#10b981; }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover, maximum-scale=1.0">
+    <title>自动计数器 · 智能计数终端</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        :root {
+            --bg: #f0f4f8;
+            --card: #ffffff;
+            --accent: #2563eb;
+            --accent2: #10b981;
+            --danger: #ef4444;
+            --warn: #f59e0b;
+            --text: #1e293b;
+            --text2: #64748b;
+            --border: #e2e8f0;
+            --shadow: 0 4px 20px rgba(0,0,0,0.05);
+            --blue-light: #eff6ff;
+        }
+        * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color: transparent; user-select:none; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #f8fafc 0%, #e0e7ff 100%);
+            min-height: 100vh;
+            display: flex; align-items: center; justify-content: center; padding: 14px;
+        }
+        .phone {
+            max-width: 420px; width: 100%; background: var(--bg); border-radius: 44px;
+            padding: 18px 16px 24px; box-shadow: 0 20px 50px rgba(0,0,0,0.1), 0 0 0 1px rgba(0,0,0,0.04);
+            border: 1px solid #dbeafe; color: var(--text); display: flex; flex-direction: column; gap: 14px;
+        }
+        .status-bar {
+            display: flex; justify-content: space-between; align-items: center;
+            background: #ffffff; border-radius: 28px; padding: 8px 16px; font-size:0.8rem; font-weight:600;
+            border:1px solid #e2e8f0; box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+        }
+        .bt-area { display:flex; align-items:center; gap:8px; }
+        .led { width:10px; height:10px; border-radius:50%; background:#cbd5e1; transition:0.3s; }
+        .led.active { background:#10b981; box-shadow:0 0 10px #10b981; animation:pulse 1.5s infinite; }
+        @keyframes pulse { 0%,100%{opacity:0.6;transform:scale(1);} 50%{opacity:1;transform:scale(1.15);} }
+        .clock { font-family:monospace; font-weight:700; font-size:0.85rem; color:#475569; }
+        .btn {
+            background:#f1f5f9; border:none; padding:7px 14px; border-radius:20px; font-weight:600; font-size:0.68rem;
+            color:#334155; cursor:pointer; display:inline-flex; align-items:center; gap:5px; border:1px solid #cbd5e1;
+            transition:0.15s; white-space:nowrap;
+        }
+        .btn:active { transform:scale(0.95); background:#e2e8f0; }
+        .btn-accent { background:#2563eb; border-color:#2563eb; color:#fff; }
+        .btn-danger { background:#ef4444; border-color:#ef4444; color:#fff; }
+        .btn-success { background:#10b981; border-color:#10b981; color:#fff; }
+        .btn-warn { background:#f59e0b; border-color:#f59e0b; color:#fff; }
+        .config-panel {
+            display:none; background:#fff; border-radius:20px; padding:12px; flex-direction:column; gap:8px;
+            border:1px solid #e2e8f0; box-shadow: var(--shadow);
+        }
+        .config-panel input {
+            background:#f8fafc; border:1px solid #cbd5e1; color:#1e293b; padding:6px 10px; border-radius:14px;
+            font-family:monospace; font-size:0.62rem; flex:1; outline:none;
+        }
+        .row { display:flex; gap:6px; flex-wrap:wrap; align-items:center; }
+        .section-label {
+            font-weight:700; font-size:0.75rem; color:#1e40af; letter-spacing:0.3px; display:flex; align-items:center; gap:6px;
+        }
+        .counter-box {
+            background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+            border-radius: 28px; padding: 20px; text-align:center;
+            border:1px solid #e2e8f0; box-shadow: 0 8px 30px rgba(37,99,235,0.08);
+            position: relative; overflow: hidden;
+        }
+        .counter-value {
+            font-size: 5.5rem; font-weight: 900; font-family: 'Inter', sans-serif;
+            color: #1e40af; line-height: 1; letter-spacing: 2px;
+            transition: transform 0.2s, color 0.2s;
+        }
+        .counter-value.pulse-anim {
+            transform: scale(1.15); color: #2563eb;
+        }
+        .counter-label { font-size:0.8rem; color:#64748b; margin-top:4px; }
+        .sensor-indicator {
+            display: flex; align-items:center; justify-content:center; gap:12px; margin-top:12px;
+            background:#f1f5f9; border-radius:20px; padding:10px 16px;
+        }
+        .sensor-dot {
+            width:14px; height:14px; border-radius:50%; background:#cbd5e1; transition:0.3s;
+        }
+        .sensor-dot.active { background:#10b981; box-shadow:0 0 14px #10b981; }
+        .sensor-text { font-weight:600; font-size:0.8rem; color:#475569; }
+        .control-grid {
+            display:grid; grid-template-columns: repeat(2,1fr); gap:10px;
+        }
+        .control-btn {
+            background:#fff; border:1px solid #e2e8f0; border-radius:22px; padding:14px 8px;
+            text-align:center; font-weight:700; font-size:0.8rem; color:#334155; cursor:pointer;
+            transition:0.15s; display:flex; flex-direction:column; align-items:center; gap:4px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.02);
+        }
+        .control-btn:active { transform:scale(0.96); background:#f8fafc; }
+        .control-btn .icon { font-size:1.5rem; }
+        .control-btn.start { color:#2563eb; border-color:#bfdbfe; }
+        .control-btn.stop { color:#ef4444; border-color:#fecaca; }
+        .control-btn.clear { color:#f59e0b; border-color:#fde68a; }
+        .control-btn.reset { color:#8b5cf6; border-color:#ddd6fe; }
+        .log-box {
+            background:#fff; border-radius:18px; padding:8px 12px; height:70px; overflow-y:auto;
+            font-family:monospace; font-size:0.58rem; color:#475569; border:1px solid #e2e8f0;
+        }
+        .log-entry { border-bottom:1px solid #f1f5f9; padding:2px 0; }
+        .log-entry.tx { color:#2563eb; } .log-entry.rx { color:#10b981; }
+    </style>
 </head>
 <body>
 <div class="phone">
-  <!-- 状态栏 -->
-  <div class="status-bar">
-    <div class="bt-area">
-      <div class="led" id="bleLed"></div>
-      <span id="connStatus">未连接</span>
-      <button class="btn" id="configToggleBtn"><i class="fas fa-cog"></i></button>
+    <div class="status-bar">
+        <div class="bt-area">
+            <div class="led" id="bleLed"></div>
+            <span id="connStatus">未连接</span>
+            <button class="btn" id="configToggleBtn"><i class="fas fa-cog"></i></button>
+        </div>
+        <div class="clock" id="liveClock">--:--:--</div>
     </div>
-    <div class="clock" id="liveClock">--:--:--</div>
-  </div>
 
-  <!-- 蓝牙配置 -->
-  <div class="config-panel" id="configPanel">
-    <div class="row">
-      <input id="serviceUuid" value="0000fff0-0000-1000-8000-00805f9b34fb" placeholder="服务UUID">
-      <input id="notifyUuid" value="0000fff1-0000-1000-8000-00805f9b34fb" placeholder="通知UUID">
-      <input id="writeUuid" value="0000fff1-0000-1000-8000-00805f9b34fb" placeholder="写入UUID">
+    <div class="config-panel" id="configPanel">
+        <div class="row">
+            <input id="serviceUuid" value="0000fff0-0000-1000-8000-00805f9b34fb" placeholder="服务UUID">
+            <input id="notifyUuid" value="0000fff1-0000-1000-8000-00805f9b34fb" placeholder="通知UUID">
+            <input id="writeUuid" value="0000fff1-0000-1000-8000-00805f9b34fb" placeholder="写入UUID">
+        </div>
+        <div class="row">
+            <button class="btn" id="scanBtn"><i class="fas fa-search"></i> 扫描</button>
+            <button class="btn" id="connectBtn" disabled>连接</button>
+            <button class="btn btn-danger" id="disconnectBtn" disabled>断开</button>
+            <button class="btn" id="simulateBtn"><i class="fas fa-flask"></i> 模拟</button>
+        </div>
     </div>
-    <div class="row">
-      <button class="btn" id="scanBtn"><i class="fas fa-search"></i> 扫描</button>
-      <button class="btn" id="connectBtn" disabled>连接</button>
-      <button class="btn btn-danger" id="disconnectBtn" disabled>断开</button>
-      <button class="btn" id="simulateBtn"><i class="fas fa-flask"></i> 模拟</button>
-    </div>
-  </div>
 
-  <!-- 计数器显示区 -->
-  <div class="counter-box">
-    <div class="counter-value" id="countDisplay">0</div>
-    <div class="counter-label">累积计数</div>
-    <div class="sensor-indicator">
-      <div class="sensor-dot" id="itemDot"></div>
-      <span class="sensor-text" id="itemStatus">未放入</span>
+    <div class="counter-box">
+        <div class="counter-value" id="countDisplay">0</div>
+        <div class="counter-label">累积计数</div>
+        <div class="sensor-indicator">
+            <div class="sensor-dot" id="itemDot"></div>
+            <span class="sensor-text" id="itemStatus">未放入</span>
+        </div>
     </div>
-  </div>
 
-  <!-- 控制按钮 -->
-  <div class="section-label"><i class="fas fa-sliders-h"></i> 操作控制</div>
-  <div class="control-grid">
-    <div class="control-btn start" id="startBtn">
-      <i class="fas fa-play icon"></i> A 启动
+    <div class="section-label"><i class="fas fa-sliders-h"></i> 操作控制</div>
+    <div class="control-grid">
+        <div class="control-btn start" id="startBtn">
+            <i class="fas fa-play icon"></i> A 启动
+        </div>
+        <div class="control-btn stop" id="stopBtn">
+            <i class="fas fa-stop icon"></i> B 停止
+        </div>
+        <div class="control-btn clear" id="clearBtn">
+            <i class="fas fa-eraser icon"></i> C 清零
+        </div>
+        <div class="control-btn reset" id="resetBtn">
+            <i class="fas fa-undo icon"></i> D 复位
+        </div>
     </div>
-    <div class="control-btn stop" id="stopBtn">
-      <i class="fas fa-stop icon"></i> B 停止
-    </div>
-    <div class="control-btn clear" id="clearBtn">
-      <i class="fas fa-eraser icon"></i> C 清零
-    </div>
-    <div class="control-btn reset" id="resetBtn">
-      <i class="fas fa-undo icon"></i> D 复位
-    </div>
-  </div>
 
-  <!-- 日志 -->
-  <div class="log-box" id="sysLog">📟 自动计数器就绪 · 蓝牙连接后可下发指令</div>
+    <div class="log-box" id="sysLog">📟 自动计数器就绪 · 蓝牙连接后可下发指令</div>
 </div>
 
 <script>
 (function() {
-  // DOM
-  const bleLed = document.getElementById('bleLed');
-  const connStatus = document.getElementById('connStatus');
-  const configToggleBtn = document.getElementById('configToggleBtn');
-  const configPanel = document.getElementById('configPanel');
-  const scanBtn = document.getElementById('scanBtn');
-  const connectBtn = document.getElementById('connectBtn');
-  const disconnectBtn = document.getElementById('disconnectBtn');
-  const simulateBtn = document.getElementById('simulateBtn');
-  const serviceUuidInput = document.getElementById('serviceUuid');
-  const notifyUuidInput = document.getElementById('notifyUuid');
-  const writeUuidInput = document.getElementById('writeUuid');
-  const sysLog = document.getElementById('sysLog');
-  const clockSpan = document.getElementById('liveClock');
-  const countDisplay = document.getElementById('countDisplay');
-  const itemDot = document.getElementById('itemDot');
-  const itemStatus = document.getElementById('itemStatus');
-  const startBtn = document.getElementById('startBtn');
-  const stopBtn = document.getElementById('stopBtn');
-  const clearBtn = document.getElementById('clearBtn');
-  const resetBtn = document.getElementById('resetBtn');
+    const bleLed = document.getElementById('bleLed');
+    const connStatus = document.getElementById('connStatus');
+    const configToggleBtn = document.getElementById('configToggleBtn');
+    const configPanel = document.getElementById('configPanel');
+    const scanBtn = document.getElementById('scanBtn');
+    const connectBtn = document.getElementById('connectBtn');
+    const disconnectBtn = document.getElementById('disconnectBtn');
+    const simulateBtn = document.getElementById('simulateBtn');
+    const serviceUuidInput = document.getElementById('serviceUuid');
+    const notifyUuidInput = document.getElementById('notifyUuid');
+    const writeUuidInput = document.getElementById('writeUuid');
+    const sysLog = document.getElementById('sysLog');
+    const clockSpan = document.getElementById('liveClock');
+    const countDisplay = document.getElementById('countDisplay');
+    const itemDot = document.getElementById('itemDot');
+    const itemStatus = document.getElementById('itemStatus');
+    const startBtn = document.getElementById('startBtn');
+    const stopBtn = document.getElementById('stopBtn');
+    const clearBtn = document.getElementById('clearBtn');
+    const resetBtn = document.getElementById('resetBtn');
 
-  let bluetoothDevice = null, gattServer = null, notifyChar = null, writeChar = null, isConnected = false;
-  let itemPresent = 0;      // 0未放入,1放入
-  let cumulativeCount = 0;
-  let prevCount = 0;
+    let bluetoothDevice = null, gattServer = null, notifyChar = null, writeChar = null, isConnected = false;
+    let cumulativeCount = 0;
+    let prevCount = 0;
 
-  function addSysLog(msg, type='system') {
-    const div = document.createElement('div');
-    div.className = 'log-entry ' + type;
-    div.textContent = `[${new Date().toLocaleTimeString()}] ${msg}`;
-    sysLog.appendChild(div); sysLog.scrollTop = sysLog.scrollHeight;
-    if(sysLog.children.length > 30) sysLog.removeChild(sysLog.children[0]);
-  }
-  function updateClock() { clockSpan.textContent = new Date().toLocaleTimeString('zh-CN',{hour12:false}); }
-  setInterval(updateClock,1000); updateClock();
-
-  function updateConnectionUI(connected) {
-    isConnected = connected;
-    bleLed.classList.toggle('active', connected);
-    connStatus.textContent = connected ? '已连接' : '未连接';
-    connectBtn.disabled = connected || !bluetoothDevice;
-    disconnectBtn.disabled = !connected;
-    scanBtn.disabled = connected;
-  }
-
-  async function sendCommand(cmd, desc) {
-    if (!isConnected || !writeChar) { addSysLog('⚠️ 未连接', 'tx'); return; }
-    try {
-      await writeChar.writeValue(new TextEncoder().encode(cmd));
-      addSysLog(`📤 ${cmd} (${desc})`, 'tx');
-    } catch(e) { addSysLog(`发送失败: ${e.message}`, 'tx'); }
-  }
-
-  // 更新显示
-  function updateDisplay() {
-    countDisplay.textContent = cumulativeCount;
-    // 计数变化时短暂动画
-    if (cumulativeCount !== prevCount) {
-      countDisplay.classList.add('pulse-anim');
-      setTimeout(() => countDisplay.classList.remove('pulse-anim'), 300);
+    function addSysLog(msg, type='system') {
+        const div = document.createElement('div');
+        div.className = 'log-entry ' + type;
+        div.textContent = `[${new Date().toLocaleTimeString()}] ${msg}`;
+        sysLog.appendChild(div); sysLog.scrollTop = sysLog.scrollHeight;
+        if(sysLog.children.length > 30) sysLog.removeChild(sysLog.children[0]);
     }
-    prevCount = cumulativeCount;
-    // 放入状态
-    if (itemPresent === 1) {
-      itemDot.classList.add('active');
-      itemStatus.textContent = '已放入';
-      itemStatus.style.color = '#10b981';
-    } else {
-      itemDot.classList.remove('active');
-      itemStatus.textContent = '未放入';
-      itemStatus.style.color = '#475569';
+    function updateClock() { clockSpan.textContent = new Date().toLocaleTimeString('zh-CN',{hour12:false}); }
+    setInterval(updateClock,1000); updateClock();
+
+    function updateConnectionUI(connected) {
+        isConnected = connected;
+        bleLed.classList.toggle('active', connected);
+        connStatus.textContent = connected ? '已连接' : '未连接';
+        connectBtn.disabled = connected || !bluetoothDevice;
+        disconnectBtn.disabled = !connected;
+        scanBtn.disabled = connected;
     }
-  }
 
-  // 解析上传数据 #是否放入#累积计数#
-  function parseSensorData(raw) {
-    const match = raw.match(/#(\d)#([\d]+)#/);
-    if (!match) return;
-    const present = parseInt(match[1]);
-    const count = parseInt(match[2]);
-    if (isNaN(present) || isNaN(count)) return;
-    itemPresent = present;
-    cumulativeCount = count;
-    updateDisplay();
-    addSysLog(`📥 放入:${present} 计数:${count}`, 'rx');
-  }
+    async function sendCommand(cmd, desc) {
+        if (!isConnected || !writeChar) { addSysLog('⚠️ 未连接', 'tx'); return; }
+        try {
+            await writeChar.writeValue(new TextEncoder().encode(cmd));
+            addSysLog(`📤 ${cmd} (${desc})`, 'tx');
+        } catch(e) { addSysLog(`发送失败: ${e.message}`, 'tx'); }
+    }
 
-  function onNotification(event) {
-    const val = event.target.value;
-    if (!val) return;
-    parseSensorData(new TextDecoder('utf-8').decode(val).trim());
-  }
+    function updateDisplay() {
+        countDisplay.textContent = cumulativeCount;
+        if (cumulativeCount !== prevCount) {
+            countDisplay.classList.add('pulse-anim');
+            setTimeout(() => countDisplay.classList.remove('pulse-anim'), 300);
+        }
+        prevCount = cumulativeCount;
+        // 放入状态保持静态（未放入）
+        itemDot.classList.remove('active');
+        itemStatus.textContent = '未放入';
+        itemStatus.style.color = '#475569';
+    }
 
-  // 蓝牙连接
-  async function scan() {
-    if (!navigator.bluetooth) { alert('需要Web Bluetooth'); return; }
-    const svc = serviceUuidInput.value.trim(); if(!svc) return alert('输入UUID');
-    try {
-      const d = await navigator.bluetooth.requestDevice({ filters: [{ services: [svc] }], optionalServices: [svc] });
-      bluetoothDevice = d; connectBtn.disabled = false;
-      addSysLog(`已选择设备: ${d.name||d.id}`, 'system');
-    } catch(e) { if(!e.message.includes('cancelled')) addSysLog(`扫描错误: ${e.message}`); }
-  }
-  async function connect() {
-    if (!bluetoothDevice) return;
-    const svc = serviceUuidInput.value.trim(), ntf = notifyUuidInput.value.trim(), wrt = writeUuidInput.value.trim();
-    try {
-      gattServer = await bluetoothDevice.gatt.connect();
-      const service = await gattServer.getPrimaryService(svc);
-      notifyChar = await service.getCharacteristic(ntf);
-      await notifyChar.startNotifications();
-      notifyChar.addEventListener('characteristicvaluechanged', onNotification);
-      if (wrt) { try { writeChar = await service.getCharacteristic(wrt); } catch(e) {} }
-      updateConnectionUI(true);
-      bluetoothDevice.addEventListener('gattserverdisconnected', onDisconnect);
-      addSysLog('✅ 蓝牙已连接', 'system');
-    } catch(e) { addSysLog(`连接失败: ${e.message}`); updateConnectionUI(false); }
-  }
-  function onDisconnect() {
-    addSysLog('🔌 断开');
-    if (notifyChar) notifyChar.removeEventListener('characteristicvaluechanged', onNotification);
-    notifyChar = writeChar = null; updateConnectionUI(false);
-  }
-  function disconnect() { if (bluetoothDevice?.gatt.connected) bluetoothDevice.gatt.disconnect(); else onDisconnect(); }
+    // 解析上传数据 #计数值#
+    function parseSensorData(raw) {
+        const match = raw.match(/#([\d]+)#/);
+        if (!match) return;
+        const count = parseInt(match[1]);
+        if (isNaN(count)) return;
+        cumulativeCount = count;
+        updateDisplay();
+        addSysLog(`📥 计数值:${count}`, 'rx');
+    }
 
-  // 按钮事件
-  configToggleBtn.addEventListener('click', ()=> configPanel.style.display = configPanel.style.display==='none'?'flex':'none');
-  scanBtn.addEventListener('click', scan);
-  connectBtn.addEventListener('click', connect);
-  disconnectBtn.addEventListener('click', disconnect);
-  startBtn.addEventListener('click', ()=> sendCommand('A', '启动'));
-  stopBtn.addEventListener('click', ()=> sendCommand('B', '停止'));
-  clearBtn.addEventListener('click', ()=> sendCommand('C', '清零'));
-  resetBtn.addEventListener('click', ()=> sendCommand('D', '复位'));
+    function onNotification(event) {
+        const val = event.target.value;
+        if (!val) return;
+        parseSensorData(new TextDecoder('utf-8').decode(val).trim());
+    }
 
-  // 模拟数据
-  simulateBtn.addEventListener('click', ()=>{
-    const present = Math.random() < 0.5 ? 0 : 1;
-    const count = cumulativeCount + (present ? 1 : 0);
-    const raw = `#${present}#${count}#`;
-    parseSensorData(raw);
-    addSysLog('🧪 模拟数据已注入', 'system');
-  });
+    async function scan() {
+        if (!navigator.bluetooth) { alert('需要Web Bluetooth'); return; }
+        const svc = serviceUuidInput.value.trim(); if(!svc) return alert('输入UUID');
+        try {
+            const d = await navigator.bluetooth.requestDevice({ filters: [{ services: [svc] }], optionalServices: [svc] });
+            bluetoothDevice = d; connectBtn.disabled = false;
+            addSysLog(`已选择设备: ${d.name||d.id}`, 'system');
+        } catch(e) { if(!e.message.includes('cancelled')) addSysLog(`扫描错误: ${e.message}`); }
+    }
+    async function connect() {
+        if (!bluetoothDevice) return;
+        const svc = serviceUuidInput.value.trim(), ntf = notifyUuidInput.value.trim(), wrt = writeUuidInput.value.trim();
+        try {
+            gattServer = await bluetoothDevice.gatt.connect();
+            const service = await gattServer.getPrimaryService(svc);
+            notifyChar = await service.getCharacteristic(ntf);
+            await notifyChar.startNotifications();
+            notifyChar.addEventListener('characteristicvaluechanged', onNotification);
+            if (wrt) { try { writeChar = await service.getCharacteristic(wrt); } catch(e) {} }
+            updateConnectionUI(true);
+            bluetoothDevice.addEventListener('gattserverdisconnected', onDisconnect);
+            addSysLog('✅ 蓝牙已连接', 'system');
+        } catch(e) { addSysLog(`连接失败: ${e.message}`); updateConnectionUI(false); }
+    }
+    function onDisconnect() {
+        addSysLog('🔌 断开');
+        if (notifyChar) notifyChar.removeEventListener('characteristicvaluechanged', onNotification);
+        notifyChar = writeChar = null; updateConnectionUI(false);
+    }
+    function disconnect() { if (bluetoothDevice?.gatt.connected) bluetoothDevice.gatt.disconnect(); else onDisconnect(); }
 
-  // 初始化
-  function init() {
-    updateConnectionUI(false);
-    updateDisplay();
-    addSysLog('📟 自动计数器已启动');
-  }
-  init();
+    configToggleBtn.addEventListener('click', ()=> configPanel.style.display = configPanel.style.display==='none'?'flex':'none');
+    scanBtn.addEventListener('click', scan);
+    connectBtn.addEventListener('click', connect);
+    disconnectBtn.addEventListener('click', disconnect);
+    startBtn.addEventListener('click', ()=> sendCommand('A', '启动'));
+    stopBtn.addEventListener('click', ()=> sendCommand('B', '停止'));
+    clearBtn.addEventListener('click', ()=> sendCommand('C', '清零'));
+    resetBtn.addEventListener('click', ()=> sendCommand('D', '复位'));
+
+    // 模拟数据（新格式）
+    simulateBtn.addEventListener('click', ()=>{
+        cumulativeCount += Math.floor(Math.random() * 3) + 1;
+        const raw = `#${cumulativeCount}#`;
+        parseSensorData(raw);
+        addSysLog('🧪 模拟数据已注入', 'system');
+    });
+
+    function init() {
+        updateConnectionUI(false);
+        updateDisplay();
+        addSysLog('📟 自动计数器已启动 (上传格式 #计数值#)');
+    }
+    init();
 })();
 </script>
 </body>
