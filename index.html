@@ -3,116 +3,112 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover, maximum-scale=1.0">
-    <title>自动计数器 · 智能计数终端</title>
+    <title>机械计数器 · 工业计数终端</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
         :root {
-            --bg: #f0f4f8;
-            --card: #ffffff;
-            --accent: #2563eb;
-            --accent2: #10b981;
-            --danger: #ef4444;
-            --warn: #f59e0b;
-            --text: #1e293b;
-            --text2: #64748b;
-            --border: #e2e8f0;
-            --shadow: 0 4px 20px rgba(0,0,0,0.05);
-            --blue-light: #eff6ff;
+            --bg: #1e293b;
+            --card: #334155;
+            --accent: #f59e0b;
+            --green: #10b981;
+            --red: #ef4444;
+            --blue: #3b82c4;
+            --text: #f1f5f9;
+            --text2: #94a3b8;
+            --border: #475569;
+            --shadow: 0 8px 24px rgba(0,0,0,0.6);
         }
         * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color: transparent; user-select:none; }
         body {
             font-family: 'Inter', sans-serif;
-            background: linear-gradient(135deg, #f8fafc 0%, #e0e7ff 100%);
+            background: radial-gradient(circle at 30% 10%, #1e293b, #0f172a);
             min-height: 100vh;
-            display: flex; align-items: center; justify-content: center; padding: 14px;
+            display: flex; align-items: center; justify-content: center; padding: 10px;
         }
         .phone {
             max-width: 420px; width: 100%; background: var(--bg); border-radius: 44px;
-            padding: 18px 16px 24px; box-shadow: 0 20px 50px rgba(0,0,0,0.1), 0 0 0 1px rgba(0,0,0,0.04);
-            border: 1px solid #dbeafe; color: var(--text); display: flex; flex-direction: column; gap: 14px;
+            padding: 16px 14px 20px; box-shadow: 0 25px 55px rgba(0,0,0,0.7), inset 0 0 0 1px rgba(255,255,255,0.04);
+            border: 2px solid #475569; color: var(--text); display: flex; flex-direction: column; gap: 12px;
         }
         .status-bar {
             display: flex; justify-content: space-between; align-items: center;
-            background: #ffffff; border-radius: 28px; padding: 8px 16px; font-size:0.8rem; font-weight:600;
-            border:1px solid #e2e8f0; box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+            background: #1e293b; border-radius: 28px; padding: 8px 16px; font-size:0.8rem; font-weight:600; border:1px solid #475569;
         }
         .bt-area { display:flex; align-items:center; gap:8px; }
-        .led { width:10px; height:10px; border-radius:50%; background:#cbd5e1; transition:0.3s; }
-        .led.active { background:#10b981; box-shadow:0 0 10px #10b981; animation:pulse 1.5s infinite; }
+        .led { width:10px; height:10px; border-radius:50%; background:#64748b; transition:0.3s; }
+        .led.active { background:#10b981; box-shadow:0 0 12px #10b981; animation:pulse 1.4s infinite; }
         @keyframes pulse { 0%,100%{opacity:0.6;transform:scale(1);} 50%{opacity:1;transform:scale(1.15);} }
-        .clock { font-family:monospace; font-weight:700; font-size:0.85rem; color:#475569; }
+        .clock { font-family:monospace; font-weight:700; font-size:0.85rem; color:#cbd5e1; }
         .btn {
-            background:#f1f5f9; border:none; padding:7px 14px; border-radius:20px; font-weight:600; font-size:0.68rem;
-            color:#334155; cursor:pointer; display:inline-flex; align-items:center; gap:5px; border:1px solid #cbd5e1;
+            background:#334155; border:none; padding:8px 14px; border-radius:20px; font-weight:600; font-size:0.68rem;
+            color:#f1f5f9; cursor:pointer; display:inline-flex; align-items:center; gap:5px; border:1px solid #475569;
             transition:0.15s; white-space:nowrap;
         }
-        .btn:active { transform:scale(0.95); background:#e2e8f0; }
-        .btn-accent { background:#2563eb; border-color:#2563eb; color:#fff; }
-        .btn-danger { background:#ef4444; border-color:#ef4444; color:#fff; }
-        .btn-success { background:#10b981; border-color:#10b981; color:#fff; }
-        .btn-warn { background:#f59e0b; border-color:#f59e0b; color:#fff; }
+        .btn:active { transform:scale(0.94); background:#475569; }
+        .btn-accent { background:#b45309; border-color:#f59e0b; color:#fff; }
+        .btn-danger { background:#b91c1c; border-color:#dc2626; color:#fff; }
+        .btn-green { background:#0d6b4a; border-color:#10b981; color:#fff; }
+        .btn-blue { background:#1e4d80; border-color:#3b82c4; color:#fff; }
         .config-panel {
-            display:none; background:#fff; border-radius:20px; padding:12px; flex-direction:column; gap:8px;
-            border:1px solid #e2e8f0; box-shadow: var(--shadow);
+            display:none; background:#1e293b; border-radius:18px; padding:10px; flex-direction:column; gap:7px; border:1px solid #475569;
         }
         .config-panel input {
-            background:#f8fafc; border:1px solid #cbd5e1; color:#1e293b; padding:6px 10px; border-radius:14px;
+            background:#0f172a; border:1px solid #475569; color:#f1f5f9; padding:5px 10px; border-radius:14px;
             font-family:monospace; font-size:0.62rem; flex:1; outline:none;
         }
         .row { display:flex; gap:6px; flex-wrap:wrap; align-items:center; }
         .section-label {
-            font-weight:700; font-size:0.75rem; color:#1e40af; letter-spacing:0.3px; display:flex; align-items:center; gap:6px;
+            font-weight:700; font-size:0.72rem; color:#f59e0b; letter-spacing:0.5px;
+            display:flex; align-items:center; gap:6px;
         }
         .counter-box {
-            background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
-            border-radius: 28px; padding: 20px; text-align:center;
-            border:1px solid #e2e8f0; box-shadow: 0 8px 30px rgba(37,99,235,0.08);
-            position: relative; overflow: hidden;
+            background: linear-gradient(180deg, #334155 0%, #1e293b 100%);
+            border-radius: 24px; padding: 18px; text-align:center; border:2px solid #475569;
+            box-shadow: 0 6px 18px rgba(0,0,0,0.5);
         }
         .counter-value {
-            font-size: 5.5rem; font-weight: 900; font-family: 'Inter', sans-serif;
-            color: #1e40af; line-height: 1; letter-spacing: 2px;
-            transition: transform 0.2s, color 0.2s;
+            font-size: 5rem; font-weight: 900; font-family: 'Inter', sans-serif;
+            color: #fbbf24; line-height: 1; letter-spacing: 3px;
+            text-shadow: 0 0 20px rgba(251,191,36,0.5);
+            transition: 0.2s;
         }
-        .counter-value.pulse-anim {
-            transform: scale(1.15); color: #2563eb;
+        .counter-label { font-size:0.7rem; color:#94a3b8; margin-top:4px; }
+        .mode-bar {
+            display:flex; justify-content:space-between; align-items:center;
+            background:#1e293b; border-radius:16px; padding:8px 12px; border:1px solid #475569;
+            margin-top:10px;
         }
-        .counter-label { font-size:0.8rem; color:#64748b; margin-top:4px; }
-        .sensor-indicator {
-            display: flex; align-items:center; justify-content:center; gap:12px; margin-top:12px;
-            background:#f1f5f9; border-radius:20px; padding:10px 16px;
+        .mode-indicator { font-weight:700; font-size:0.8rem; }
+        .speed-indicator { font-weight:700; font-size:0.9rem; color:#f59e0b; }
+        .speed-bar-bg {
+            height:6px; background:#334155; border-radius:4px; overflow:hidden; margin:4px 0;
         }
-        .sensor-dot {
-            width:14px; height:14px; border-radius:50%; background:#cbd5e1; transition:0.3s;
+        .speed-bar-fill {
+            height:100%; background:linear-gradient(90deg,#f59e0b,#fbbf24); border-radius:4px;
+            transition:width 0.3s;
         }
-        .sensor-dot.active { background:#10b981; box-shadow:0 0 14px #10b981; }
-        .sensor-text { font-weight:600; font-size:0.8rem; color:#475569; }
-        .control-grid {
-            display:grid; grid-template-columns: repeat(2,1fr); gap:10px;
+        .ctrl-grid {
+            display:grid; grid-template-columns: repeat(3,1fr); gap:8px;
         }
-        .control-btn {
-            background:#fff; border:1px solid #e2e8f0; border-radius:22px; padding:14px 8px;
-            text-align:center; font-weight:700; font-size:0.8rem; color:#334155; cursor:pointer;
-            transition:0.15s; display:flex; flex-direction:column; align-items:center; gap:4px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.02);
+        .ctrl-btn {
+            background:#334155; border:2px solid #475569; border-radius:18px; padding:12px 6px;
+            text-align:center; font-weight:700; font-size:0.7rem; color:#cbd5e1; cursor:pointer;
+            transition:0.1s; display:flex; flex-direction:column; align-items:center; gap:3px;
         }
-        .control-btn:active { transform:scale(0.96); background:#f8fafc; }
-        .control-btn .icon { font-size:1.5rem; }
-        .control-btn.start { color:#2563eb; border-color:#bfdbfe; }
-        .control-btn.stop { color:#ef4444; border-color:#fecaca; }
-        .control-btn.clear { color:#f59e0b; border-color:#fde68a; }
-        .control-btn.reset { color:#8b5cf6; border-color:#ddd6fe; }
+        .ctrl-btn:active { transform:scale(0.94); background:#475569; border-color:#f59e0b; }
+        .ctrl-btn .cmd { font-size:1.3rem; font-weight:800; color:#f59e0b; }
         .log-box {
-            background:#fff; border-radius:18px; padding:8px 12px; height:70px; overflow-y:auto;
-            font-family:monospace; font-size:0.58rem; color:#475569; border:1px solid #e2e8f0;
+            background:#0f172a; border-radius:14px; padding:7px 10px; height:70px; overflow-y:auto;
+            font-family:monospace; font-size:0.56rem; color:#94a3b8; border:1px solid #334155;
         }
-        .log-entry { border-bottom:1px solid #f1f5f9; padding:2px 0; }
-        .log-entry.tx { color:#2563eb; } .log-entry.rx { color:#10b981; }
+        .log-entry { border-bottom:1px solid #1e293b; padding:2px 0; }
+        .log-entry.tx { color:#fbbf24; } .log-entry.rx { color:#10b981; }
     </style>
 </head>
 <body>
 <div class="phone">
+    <!-- 状态栏 -->
     <div class="status-bar">
         <div class="bt-area">
             <div class="led" id="bleLed"></div>
@@ -122,6 +118,7 @@
         <div class="clock" id="liveClock">--:--:--</div>
     </div>
 
+    <!-- 蓝牙配置面板 -->
     <div class="config-panel" id="configPanel">
         <div class="row">
             <input id="serviceUuid" value="0000fff0-0000-1000-8000-00805f9b34fb" placeholder="服务UUID">
@@ -136,36 +133,51 @@
         </div>
     </div>
 
+    <!-- 计数显示区 -->
     <div class="counter-box">
         <div class="counter-value" id="countDisplay">0</div>
-        <div class="counter-label">累积计数</div>
-        <div class="sensor-indicator">
-            <div class="sensor-dot" id="itemDot"></div>
-            <span class="sensor-text" id="itemStatus">未放入</span>
+        <div class="counter-label">累计计数值</div>
+        <div class="mode-bar">
+            <span class="mode-indicator" id="modeText">计数模式</span>
+            <span class="speed-indicator" id="speedDisplay" style="display:none;">速度 <span id="speedVal">50</span></span>
         </div>
     </div>
 
+    <!-- 控制按钮区 -->
     <div class="section-label"><i class="fas fa-sliders-h"></i> 操作控制</div>
-    <div class="control-grid">
-        <div class="control-btn start" id="startBtn">
-            <i class="fas fa-play icon"></i> A 启动
+    <div class="ctrl-grid">
+        <div class="ctrl-btn" data-cmd="1">
+            <span class="cmd">1</span>
+            <span>计数模式</span>
         </div>
-        <div class="control-btn stop" id="stopBtn">
-            <i class="fas fa-stop icon"></i> B 停止
+        <div class="ctrl-btn" data-cmd="2">
+            <span class="cmd">2</span>
+            <span>调速模式</span>
         </div>
-        <div class="control-btn clear" id="clearBtn">
-            <i class="fas fa-eraser icon"></i> C 清零
-        </div>
-        <div class="control-btn reset" id="resetBtn">
-            <i class="fas fa-undo icon"></i> D 复位
+        <div class="ctrl-btn" data-cmd="3">
+            <span class="cmd">3</span>
+            <span>复位模式</span>
         </div>
     </div>
 
-    <div class="log-box" id="sysLog">📟 自动计数器就绪 · 蓝牙连接后可下发指令</div>
+    <div class="row" style="justify-content:center; gap:10px;">
+        <button class="btn btn-green" data-cmd="A">A 系统开始</button>
+        <button class="btn btn-danger" data-cmd="B">B 系统关闭</button>
+    </div>
+
+    <div class="row" style="justify-content:center; gap:10px;">
+        <button class="btn" data-cmd="E">E 速度 +</button>
+        <button class="btn" data-cmd="F">F 速度 -</button>
+        <button class="btn btn-accent" data-cmd="Z">Z 计数清零</button>
+    </div>
+
+    <!-- 日志 -->
+    <div class="log-box" id="sysLog">⚙️ 机械计数器就绪 · 蓝牙连接后可下发指令</div>
 </div>
 
 <script>
 (function() {
+    // DOM
     const bleLed = document.getElementById('bleLed');
     const connStatus = document.getElementById('connStatus');
     const configToggleBtn = document.getElementById('configToggleBtn');
@@ -180,18 +192,21 @@
     const sysLog = document.getElementById('sysLog');
     const clockSpan = document.getElementById('liveClock');
     const countDisplay = document.getElementById('countDisplay');
-    const itemDot = document.getElementById('itemDot');
-    const itemStatus = document.getElementById('itemStatus');
-    const startBtn = document.getElementById('startBtn');
-    const stopBtn = document.getElementById('stopBtn');
-    const clearBtn = document.getElementById('clearBtn');
-    const resetBtn = document.getElementById('resetBtn');
+    const modeText = document.getElementById('modeText');
+    const speedDisplay = document.getElementById('speedDisplay');
+    const speedVal = document.getElementById('speedVal');
 
+    // 蓝牙变量
     let bluetoothDevice = null, gattServer = null, notifyChar = null, writeChar = null, isConnected = false;
-    let cumulativeCount = 0;
-    let prevCount = 0;
+    // 状态变量
+    let cumulativeCount = 0;       // 累计计数值（来自上传）
+    let currentMode = 'count';     // 'count', 'speed', 'reset'
+    let currentSpeed = 50;         // 速度 0-100
+    let systemRunning = false;     // 系统是否运行
 
-    function addSysLog(msg, type='system') {
+    const modeNames = { count: '计数模式', speed: '调速模式', reset: '复位模式' };
+
+    function addLog(msg, type='system') {
         const div = document.createElement('div');
         div.className = 'log-entry ' + type;
         div.textContent = `[${new Date().toLocaleTimeString()}] ${msg}`;
@@ -210,52 +225,100 @@
         scanBtn.disabled = connected;
     }
 
+    // 更新界面显示
+    function updateUI() {
+        countDisplay.textContent = cumulativeCount;
+        modeText.textContent = modeNames[currentMode] || currentMode;
+        if (currentMode === 'speed') {
+            speedDisplay.style.display = 'inline';
+            speedVal.textContent = currentSpeed;
+        } else {
+            speedDisplay.style.display = 'none';
+        }
+    }
+
+    // 发送指令
     async function sendCommand(cmd, desc) {
-        if (!isConnected || !writeChar) { addSysLog('⚠️ 未连接', 'tx'); return; }
+        if (!isConnected || !writeChar) {
+            addLog('⚠️ 未连接，无法发送: '+cmd, 'tx');
+            return;
+        }
         try {
             await writeChar.writeValue(new TextEncoder().encode(cmd));
-            addSysLog(`📤 ${cmd} (${desc})`, 'tx');
-        } catch(e) { addSysLog(`发送失败: ${e.message}`, 'tx'); }
+            addLog(`📤 下发 ${cmd} (${desc})`, 'tx');
+        } catch(e) { addLog(`发送失败: ${e.message}`, 'tx'); }
     }
 
-    function updateDisplay() {
-        countDisplay.textContent = cumulativeCount;
-        if (cumulativeCount !== prevCount) {
-            countDisplay.classList.add('pulse-anim');
-            setTimeout(() => countDisplay.classList.remove('pulse-anim'), 300);
+    // 处理下发指令对应的本地状态更新
+    function processLocalAction(cmd) {
+        switch(cmd) {
+            case '1': currentMode = 'count'; break;
+            case '2': currentMode = 'speed'; break;
+            case '3': currentMode = 'reset'; break;
+            case 'A': systemRunning = true; addLog('▶ 系统开始', 'system'); break;
+            case 'B': systemRunning = false; addLog('⏹ 系统关闭', 'system'); break;
+            case 'E':
+                if (currentMode === 'speed') {
+                    currentSpeed = Math.min(100, currentSpeed + 5);
+                    addLog(`🔺 速度增加至 ${currentSpeed}`, 'system');
+                }
+                break;
+            case 'F':
+                if (currentMode === 'speed') {
+                    currentSpeed = Math.max(0, currentSpeed - 5);
+                    addLog(`🔻 速度减少至 ${currentSpeed}`, 'system');
+                }
+                break;
+            case 'Z':
+                cumulativeCount = 0;
+                addLog('🔄 计数已清零', 'system');
+                break;
         }
-        prevCount = cumulativeCount;
-        // 放入状态保持静态（未放入）
-        itemDot.classList.remove('active');
-        itemStatus.textContent = '未放入';
-        itemStatus.style.color = '#475569';
+        updateUI();
     }
 
-    // 解析上传数据 #计数值#
+    // 按钮事件委托
+    document.querySelectorAll('[data-cmd]').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const cmd = btn.dataset.cmd;
+            // 先更新本地状态模拟
+            processLocalAction(cmd);
+            // 然后通过蓝牙下发指令
+            sendCommand(cmd, btn.textContent.trim());
+        });
+    });
+
+    // 解析上传数据 #累计计数值#
     function parseSensorData(raw) {
-        const match = raw.match(/#([\d]+)#/);
-        if (!match) return;
-        const count = parseInt(match[1]);
-        if (isNaN(count)) return;
-        cumulativeCount = count;
-        updateDisplay();
-        addSysLog(`📥 计数值:${count}`, 'rx');
+        const clean = raw.replace(/[\r\n\s]/g, '');
+        const match = clean.match(/#(\d+)#/);
+        if (match) {
+            const count = parseInt(match[1]);
+            if (!isNaN(count)) {
+                cumulativeCount = count;
+                updateUI();
+                addLog(`📥 计数更新: ${count}`, 'rx');
+                return;
+            }
+        }
+        addLog(`⚠️ 无法解析: "${raw}"`, 'system');
     }
 
     function onNotification(event) {
         const val = event.target.value;
         if (!val) return;
-        parseSensorData(new TextDecoder('utf-8').decode(val).trim());
+        parseSensorData(new TextDecoder('utf-8').decode(val));
     }
 
+    // 蓝牙连接
     async function scan() {
         if (!navigator.bluetooth) { alert('需要Web Bluetooth'); return; }
         const svc = serviceUuidInput.value.trim(); if(!svc) return alert('输入UUID');
         try {
             const d = await navigator.bluetooth.requestDevice({ filters: [{ services: [svc] }], optionalServices: [svc] });
             bluetoothDevice = d; connectBtn.disabled = false;
-            addSysLog(`已选择设备: ${d.name||d.id}`, 'system');
-        } catch(e) { if(!e.message.includes('cancelled')) addSysLog(`扫描错误: ${e.message}`); }
+            addLog(`已选择设备: ${d.name||d.id}`, 'system');
+        } catch(e) { if(!e.message.includes('cancelled')) addLog(`扫描错误: ${e.message}`); }
     }
     async function connect() {
         if (!bluetoothDevice) return;
@@ -269,37 +332,33 @@
             if (wrt) { try { writeChar = await service.getCharacteristic(wrt); } catch(e) {} }
             updateConnectionUI(true);
             bluetoothDevice.addEventListener('gattserverdisconnected', onDisconnect);
-            addSysLog('✅ 蓝牙已连接', 'system');
-        } catch(e) { addSysLog(`连接失败: ${e.message}`); updateConnectionUI(false); }
+            addLog('✅ 蓝牙已连接', 'system');
+        } catch(e) { addLog(`连接失败: ${e.message}`); updateConnectionUI(false); }
     }
     function onDisconnect() {
-        addSysLog('🔌 断开');
+        addLog('🔌 断开');
         if (notifyChar) notifyChar.removeEventListener('characteristicvaluechanged', onNotification);
         notifyChar = writeChar = null; updateConnectionUI(false);
     }
     function disconnect() { if (bluetoothDevice?.gatt.connected) bluetoothDevice.gatt.disconnect(); else onDisconnect(); }
 
+    // 模拟数据
+    simulateBtn.addEventListener('click', ()=>{
+        cumulativeCount += Math.floor(Math.random()*5)+1;
+        const raw = `#${cumulativeCount}#`;
+        parseSensorData(raw);
+        addLog('🧪 模拟数据已注入', 'system');
+    });
+
     configToggleBtn.addEventListener('click', ()=> configPanel.style.display = configPanel.style.display==='none'?'flex':'none');
     scanBtn.addEventListener('click', scan);
     connectBtn.addEventListener('click', connect);
     disconnectBtn.addEventListener('click', disconnect);
-    startBtn.addEventListener('click', ()=> sendCommand('A', '启动'));
-    stopBtn.addEventListener('click', ()=> sendCommand('B', '停止'));
-    clearBtn.addEventListener('click', ()=> sendCommand('C', '清零'));
-    resetBtn.addEventListener('click', ()=> sendCommand('D', '复位'));
-
-    // 模拟数据（新格式）
-    simulateBtn.addEventListener('click', ()=>{
-        cumulativeCount += Math.floor(Math.random() * 3) + 1;
-        const raw = `#${cumulativeCount}#`;
-        parseSensorData(raw);
-        addSysLog('🧪 模拟数据已注入', 'system');
-    });
 
     function init() {
         updateConnectionUI(false);
-        updateDisplay();
-        addSysLog('📟 自动计数器已启动 (上传格式 #计数值#)');
+        updateUI();
+        addLog('⚙️ 机械计数器已启动');
     }
     init();
 })();
